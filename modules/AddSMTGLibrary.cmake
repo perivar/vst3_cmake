@@ -257,21 +257,40 @@ function(smtg_make_plugin_package target extension)
         else()
             set(PLUGIN_PACKAGE_PATH ${PLUGIN_BINARY_DIR}/$<$<CONFIG:Debug>:Debug>$<$<CONFIG:Release>:Release>/${PLUGIN_PACKAGE_NAME})
         endif()
+
+        # PIN: 31.03.2020 - added MINGW support
         set_target_properties(${target} PROPERTIES 
             SUFFIX                      .${PLUGIN_EXTENSION}
-            LINK_FLAGS                  /EXPORT:GetPluginFactory
             SMTG_PLUGIN_PACKAGE_PATH    ${PLUGIN_PACKAGE_PATH}
-        )
-        
-        # In order not to have the PDB inside the plug-in package in release builds, we specify a different location.
-        if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-            set(WIN_PDB WIN_PDB32)
-        else()
-            set(WIN_PDB WIN_PDB64)
+        )        
+        if (MSVC)
+            set_target_properties(${target} PROPERTIES 
+                LINK_FLAGS                  /EXPORT:GetPluginFactory
+            )        
         endif()
-        set_target_properties(${target} PROPERTIES
-            PDB_OUTPUT_DIRECTORY        ${PROJECT_BINARY_DIR}/${WIN_PDB}
-        )
+        if (MINGW)
+            set_target_properties(${target} PROPERTIES 
+                # This is a MSVC property - when disabling this for g++ it's important that the GetPluginFactory symbol
+                # is exported by #define EXPORT_FACTORY	__declspec(dllexport) in pluginfactory.h
+                # LINK_FLAGS                  /EXPORT:GetPluginFactory
+
+                # Stop CMake from prepending `lib` to library names
+                PREFIX                      ""
+            )   
+        endif()
+
+        # ORIGINAL:
+        if (MSVC)
+            # In order not to have the PDB inside the plug-in package in release builds, we specify a different location.
+            if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+                set(WIN_PDB WIN_PDB32)
+            else()
+                set(WIN_PDB WIN_PDB64)
+            endif()
+            set_target_properties(${target} PROPERTIES
+                PDB_OUTPUT_DIRECTORY        ${PROJECT_BINARY_DIR}/${WIN_PDB}
+            )
+        endif()
 
         # Create Bundle on Windows
         if(SMTG_CREATE_BUNDLE_FOR_WINDOWS)

@@ -101,17 +101,11 @@ add_compile_options($<$<CONFIG:Release>:-DRELEASE=1>)
 add_compile_options($<$<CONFIG:RelWithDebInfo>:-DRELEASE=1>)
 
 if(SMTG_WIN)
-    add_compile_options(/MP)                            # Multi-processor Compilation
-    if(NOT ${CMAKE_GENERATOR} MATCHES "ARM")
-        add_compile_options($<$<CONFIG:Debug>:/ZI>)     # Program Database for Edit And Continue
-    endif()
-    if(SMTG_USE_STATIC_CRT)
-        add_compile_options($<$<CONFIG:Debug>:/MTd>)    # Runtime Library: /MTd = MultiThreaded Debug Runtime
-        add_compile_options($<$<CONFIG:Release>:/MT>)   # Runtime Library: /MT  = MultiThreaded Runtime
-    else()
-        add_compile_options($<$<CONFIG:Debug>:/MDd>)    # Runtime Library: /MDd = MultiThreadedDLL Debug Runtime
-        add_compile_options($<$<CONFIG:Release>:/MD>)   # Runtime Library: /MD  = MultiThreadedDLL Runtime
-    endif()
+    # PIN: 09.04.2020
+    # Since this cmake file is loaded before any of the platform variables is set,
+    # it's impossible to know whether we are compiling on windows using MSVC or MINGW.
+    # Therefore this is moved to the setupPlatformToolset macro
+    message(STATUS "Building on Windows")
 endif()
 
 # Add colors to clang output when using Ninja

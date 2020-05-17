@@ -1,7 +1,13 @@
 
 macro(setupVstGuiSupport)
-    set(VSTGUI_DISABLE_UNITTESTS 1)
-    set(VSTGUI_STANDALONE_EXAMPLES OFF)
+    # PIN: 17.05.2020 - added IF NOT DEFINED to check if these haven't already been set before
+    if(NOT DEFINED VSTGUI_DISABLE_UNITTESTS)
+        set(VSTGUI_DISABLE_UNITTESTS ON)
+    endif()    
+    if(NOT DEFINED VSTGUI_STANDALONE_EXAMPLES)
+        set(VSTGUI_STANDALONE_EXAMPLES OFF)
+    endif()
+
     if(SMTG_BUILD_UNIVERSAL_BINARY)
         set(VSTGUI_STANDALONE OFF)
         set(VSTGUI_TOOLS OFF)
@@ -12,7 +18,7 @@ macro(setupVstGuiSupport)
         set(VSTGUI_STANDALONE ON)
     endif()
     
-    add_subdirectory(vstgui4/vstgui)
+    add_subdirectory(${VSTGUI_ROOT}/vstgui4/vstgui)
 
     set(VST3_VSTGUI_SOURCES
         ${VSTGUI_ROOT}/vstgui4/vstgui/plugin-bindings/vst3groupcontroller.cpp
